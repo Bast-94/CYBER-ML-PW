@@ -15,7 +15,7 @@ import seaborn as sns
 import pandas as pd
 import numpy as np
 import os
-def fgsm_attack_svm_2c(classifier, orig_point, dist_function, step=None, epsilon=np.inf, max_step=200):
+def fgsm_attack_svm_2c(classifier:svm.SVC, orig_point, dist_function, step=None, epsilon=np.inf, max_step=200):
     data_point = orig_point.copy()
     orig_class = classifier.predict(data_point.reshape(1, -1))[0]
     new_class = orig_class
@@ -26,16 +26,12 @@ def fgsm_attack_svm_2c(classifier, orig_point, dist_function, step=None, epsilon
     if step is None:
         step = 0.01
     i =0
-    
-    max_step = 10000
-    step = 0.0001
+    step = 0.05
+    print("Original class:", orig_class)
     eps_evol = [current_eps]
     while orig_class == new_class:
         if current_eps < epsilon and i < max_step:
-            # get datapoint by gradient descent
-            grad = classifier.coef_[0]
-            data_point = data_point + step * np.sign(grad) 
-                        
+            data_point = data_point + step *  np.sign(classifier.decision_function(data_point.reshape(1, -1))[0])
             new_class = classifier.predict(data_point.reshape(1, -1))[0]
             current_eps = dist_function(data_point,orig_point)
             attack_info = data_point, current_eps
@@ -51,6 +47,7 @@ def fgsm_attack_svm_2c(classifier, orig_point, dist_function, step=None, epsilon
             
             break
         i += step
+    print("decision function",classifier.decision_function(data_point.reshape(1, -1))[0])
     fig, ax = plt.subplots()
     ax.plot(eps_evol)
     ax.set_xlabel("Step")
@@ -59,6 +56,23 @@ def fgsm_attack_svm_2c(classifier, orig_point, dist_function, step=None, epsilon
     plt.show()
     fig.savefig("eps_evol.png")
     return attack_info
+
+
+def plot_svc_decision_function(clf, ax=None):
+    """Plot the decision function for a 2D SVC"""
+    if ax is None:
+        ax = plt.gca()
+    x = np.linspace(plt.xlim()[0], plt.xlim()[1], 30)
+    y = np.linspace(plt.ylim()[0], plt.ylim()[1], 30)
+    Y, X = np.meshgrid(y, x)
+    P = np.zeros_like(X)
+    for i, xi in enumerate(x):
+        for j, yj in enumerate(y):
+            P[i, j] = clf.decision_function([xi, yj])
+    # plot the margins
+    ax.contour(X, Y, P, colors='k',
+               levels=[-1, 0, 1], alpha=0.5,
+               linestyles=['--', '-', '--'])
 
 if __name__ == "__main__":
     
@@ -69,6 +83,11 @@ if __name__ == "__main__":
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
     # Train model
     clf = svm.SVC(kernel='linear', C=1).fit(X_train, y_train)
+    #plot SVC 
+    fig, ax = plt.subplots()
+    ax.scatter(X[:, 0], X[:, 1], c=y, s=50, cmap='autumn')
+    
+    fig.savefig("svm.png")
     # Predict
     y_pred = clf.predict(X_test)
     # Evaluate
@@ -81,6 +100,9 @@ if __name__ == "__main__":
     dist_func = lambda x, y: np.linalg.norm(x - y)
     print("SVM coef:", clf.coef_[0])
     # orig_point is random point from X_test
-    orig_point = X_test[0]
+    orig_point = X_test[0] 
+    print("Original point:", orig_point)
+    print("Original class:", clf.predict(orig_point.reshape(1, -1))[0])
+    print(clf.decision_function(orig_point.reshape(1, -1))[0])
     attack_info = fgsm_attack_svm_2c(clf, X_test[5], dist_function=dist_func)
     print("Attack info:", attack_info)
