@@ -24,7 +24,7 @@ def fgsm_attack_svm_2c(classifier, orig_point, dist_function, step=None, epsilon
                 print("Attack failed: max step exceeded")
             break
         step += 1
-    return classifier, orig_point, dist_function, step, epsilon, max_step
+    return attack_info.values()
 
 if __name__ == "__main__":
     # Test fgsm_attack_svm_2c
@@ -36,15 +36,16 @@ if __name__ == "__main__":
     from sklearn.metrics import classification_report
     from sklearn.metrics import roc_auc_score
     from sklearn.metrics import roc_curve
+    # import makeblobs
+    from sklearn.datasets import make_blobs
     import matplotlib.pyplot as plt
     import seaborn as sns
     import pandas as pd
     import numpy as np
     import os
     
-    cancer = datasets.load_breast_cancer()
-    X = cancer.data
-    y = cancer.target
+    
+    X , y = make_blobs(n_samples=1000, centers=2, n_features=2, random_state=0)
     # Split data
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
     # Train model
