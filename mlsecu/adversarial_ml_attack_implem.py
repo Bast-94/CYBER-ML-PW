@@ -31,7 +31,7 @@ def fgsm_attack_svm_2c(classifier:svm.SVC, orig_point, dist_function, step=None,
     eps_evol = [current_eps]
     while orig_class == new_class:
         if current_eps < epsilon and i < max_step:
-            data_point = data_point + step *  np.sign(classifier.decision_function(data_point.reshape(1, -1))[0])
+            data_point = data_point + step *  (classifier.decision_function(data_point.reshape(1, -1))[0])
             new_class = classifier.predict(data_point.reshape(1, -1))[0]
             current_eps = dist_function(data_point,orig_point)
             attack_info = data_point, current_eps
