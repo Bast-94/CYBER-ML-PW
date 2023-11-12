@@ -56,7 +56,6 @@ def fgsm_attack_svm_2c(classifier:svm.SVC, orig_point, dist_function, step=None,
     fig, ax = plt.subplots(figsize=(10, 10))
     data_points_pos = np.array(data_points_pos)
     ax.plot(data_points_pos[:,0],data_points_pos[:,1], marker="x", linestyle="", label="Data points")
-    ax.plot(orig_point[0],orig_point[1], marker="o", linestyle="", label="Original point")
     # plot the line which separates the two classes
     w = classifier.coef_[0]
     a = -w[0] / w[1]
@@ -88,7 +87,7 @@ if __name__ == "__main__":
     
     dist_func = lambda x, y: np.linalg.norm(x - y)
     
-    orig_point = random.choice(X_test)
+    orig_point = random.choice(X_test[y_test == 0])
     
-    attack_info = fgsm_attack_svm_2c(clf, orig_point, dist_function=dist_func,step=0.05)
+    attack_info = fgsm_attack_svm_2c(clf, orig_point, dist_function=dist_func,step=0.05, max_step=1000)
     print("Attack info:", attack_info)
