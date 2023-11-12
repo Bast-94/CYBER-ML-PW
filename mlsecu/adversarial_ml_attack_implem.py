@@ -21,16 +21,16 @@ def fgsm_attack_svm_2c(classifier, orig_point, dist_function, step=None, epsilon
     new_class = orig_class
     current_eps = dist_function(data_point,orig_point)
     attack_info = {}
+    max_step += 100
     if step is None:
         step = 0.01
-    i = 0
-    
+    i =0
     eps_evol = [current_eps]
     while orig_class == new_class:
         if current_eps < epsilon and i < max_step:
             # get datapoint by gradient descent
             grad = classifier.coef_[0]
-            data_point = data_point + step * np.sign(grad)
+            data_point = data_point + step * np.sign(grad) 
                         
             new_class = classifier.predict(data_point.reshape(1, -1))[0]
             current_eps = dist_function(data_point,orig_point)
@@ -38,10 +38,13 @@ def fgsm_attack_svm_2c(classifier, orig_point, dist_function, step=None, epsilon
             eps_evol.append(current_eps)
         else:
             attack_info = dict(data_point=None, current_eps=None)
+            
             if current_eps > epsilon:
                 print("Attack failed: epsilon exceeded")
             if step >= max_step:
                 print("Attack failed: max step exceeded")
+            print("Step:", i)
+            
             break
         i += step
     fig, ax = plt.subplots()
@@ -73,5 +76,7 @@ if __name__ == "__main__":
     # Attack
     dist_func = lambda x, y: np.linalg.norm(x - y)
     print("SVM coef:", clf.coef_[0])
+    # orig_point is random point from X_test
+    orig_point = X_test[0]
     attack_info = fgsm_attack_svm_2c(clf, X_test[0], dist_function=dist_func)
     print("Attack info:", attack_info)
