@@ -11,7 +11,7 @@ def fgsm_attack_svm_2c(classifier, orig_point, dist_function, step=None, epsilon
         if current_eps < epsilon and step < max_step:
             # get datapoint by gradient descent
             grad = classifier.coef_[0]
-            data_point = data_point + grad
+            data_point = data_point + grad * dist_function(data_point,orig_point)
             
             new_class = classifier.predict(data_point.reshape(1, -1))[0]
             current_eps = dist_function(data_point,orig_point)
