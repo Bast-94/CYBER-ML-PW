@@ -3,7 +3,7 @@ def fgsm_attack_svm_2c(classifier, orig_point, dist_function, step=None, epsilon
     data_point = orig_point.copy()
     orig_class = classifier.predict(data_point.reshape(1, -1))[0]
     new_class = orig_class
-    current_eps = np.linalg.norm(data_point - orig_point)
+    current_eps = dist_function(data_point,orig_point)
     attack_info = {}
     if step is None:
         step = 0
@@ -11,8 +11,8 @@ def fgsm_attack_svm_2c(classifier, orig_point, dist_function, step=None, epsilon
         if current_eps < epsilon and step < max_step:
             # get datapoint by gradient descent
             grad = classifier.coef_[0]
-            data_point = data_point + grad * dist_function(data_point,orig_point)
-            
+            data_point = data_point + grad 
+                        
             new_class = classifier.predict(data_point.reshape(1, -1))[0]
             current_eps = dist_function(data_point,orig_point)
             attack_info = dict(data_point=data_point, current_eps=current_eps)
@@ -60,5 +60,6 @@ if __name__ == "__main__":
     
     # Attack
     dist_func = lambda x, y: np.linalg.norm(x - y)
+    print("SVM coef:", clf.coef_)
     attack_info = fgsm_attack_svm_2c(clf, X_test[0], dist_function=dist_func, epsilon=0.1)
     print("Attack info:", attack_info)
