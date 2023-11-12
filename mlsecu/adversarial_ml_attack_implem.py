@@ -26,6 +26,7 @@ def fgsm_attack_svm_2c(classifier, orig_point, dist_function, step=None, epsilon
     if step is None:
         step = 0.01
     i =0
+    
     eps_evol = [current_eps]
     while orig_class == new_class:
         if current_eps < epsilon and i < max_step:
