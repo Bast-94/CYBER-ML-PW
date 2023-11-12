@@ -26,7 +26,7 @@ def fgsm_attack_svm_2c(classifier:svm.SVC, orig_point, dist_function, step=None,
     if step is None:
         step = 0.01
     i =0
-    step/=1
+    
     print("Original class:", orig_class)
     eps_evol = [current_eps]
     data_points_pos =[data_point]
@@ -51,7 +51,7 @@ def fgsm_attack_svm_2c(classifier:svm.SVC, orig_point, dist_function, step=None,
             print("Step:", i)
             break
             #return classifier.decision_function(data_point.reshape(1, -1))[0],0
-        i += step
+        i += 1
     print("decision function",classifier.decision_function(data_point.reshape(1, -1))[0])
     fig, ax = plt.subplots(figsize=(10, 10))
     data_points_pos = np.array(data_points_pos)
