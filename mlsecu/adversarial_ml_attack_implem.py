@@ -21,6 +21,7 @@ def fgsm_attack_svm_2c(classifier, orig_point, dist_function, step=None, epsilon
     new_class = orig_class
     current_eps = dist_function(data_point,orig_point)
     attack_info = {}
+    step = 0.01
     max_step += 100
     if step is None:
         step = 0.01
