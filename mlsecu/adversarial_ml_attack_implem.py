@@ -26,7 +26,7 @@ def fgsm_attack_svm_2c(classifier:svm.SVC, orig_point, dist_function, step=None,
     if step is None:
         step = 0.01
     i =0
-    step = 0.05
+    
     print("Original class:", orig_class)
     eps_evol = [current_eps]
     while orig_class == new_class:
