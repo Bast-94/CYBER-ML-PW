@@ -27,6 +27,8 @@ def fgsm_attack_svm_2c(classifier, orig_point, dist_function, step=None, epsilon
         step = 0.01
     i =0
     
+    max_step = 10000
+    step = 0.0001
     eps_evol = [current_eps]
     while orig_class == new_class:
         if current_eps < epsilon and i < max_step:
@@ -36,13 +38,13 @@ def fgsm_attack_svm_2c(classifier, orig_point, dist_function, step=None, epsilon
                         
             new_class = classifier.predict(data_point.reshape(1, -1))[0]
             current_eps = dist_function(data_point,orig_point)
-            attack_info = dict(data_point=data_point, current_eps=current_eps)
+            attack_info = data_point, current_eps
             eps_evol.append(current_eps)
         else:
-            attack_info = dict(data_point=None, current_eps=None)
+            attack_info = (None, None)
             
             if current_eps > epsilon:
-                print("Attack failed: epsilon exceeded")
+                print("Attack failed: epsilon exceeded",current_eps)
             if step >= max_step:
                 print("Attack failed: max step exceeded")
             print("Step:", i)
@@ -56,7 +58,7 @@ def fgsm_attack_svm_2c(classifier, orig_point, dist_function, step=None, epsilon
     ax.set_title("Evolution of distance to original point")
     plt.show()
     fig.savefig("eps_evol.png")
-    return attack_info.values()
+    return attack_info
 
 if __name__ == "__main__":
     
@@ -80,5 +82,5 @@ if __name__ == "__main__":
     print("SVM coef:", clf.coef_[0])
     # orig_point is random point from X_test
     orig_point = X_test[0]
-    attack_info = fgsm_attack_svm_2c(clf, X_test[0], dist_function=dist_func)
+    attack_info = fgsm_attack_svm_2c(clf, X_test[5], dist_function=dist_func)
     print("Attack info:", attack_info)
