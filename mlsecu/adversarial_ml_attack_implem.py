@@ -81,7 +81,6 @@ if __name__ == "__main__":
     print("Confusion matrix:\n", confusion_matrix(y_test, y_pred))
     print("Classification report:\n", classification_report(y_test, y_pred))
     print("ROC AUC score:", roc_auc_score(y_test, y_pred))
-    
     # Attack
     dist_func = lambda x, y: np.linalg.norm(x - y)
     print("SVM coef:", clf.coef_[0])
