@@ -26,34 +26,36 @@ def fgsm_attack_svm_2c(classifier:svm.SVC, orig_point, dist_function, step=None,
     if step is None:
         step = 0.01
     i =0
-    
+    step/=1
     print("Original class:", orig_class)
     eps_evol = [current_eps]
     data_points_pos =[data_point]
     while orig_class == new_class:
         if current_eps < epsilon and i < max_step:
-            grad = classifier.decision_function(data_point.reshape(1, -1))[0] * classifier.coef_[0]
+            grad = np.sign(classifier.decision_function(data_point.reshape(1, -1))[0]) * classifier.coef_[0]
             data_point = data_point - step *  grad
             data_points_pos.append(data_point)
             new_class = classifier.predict(data_point.reshape(1, -1))[0]
             current_eps = dist_function(data_point,orig_point)
             attack_info = data_point, current_eps
-            eps_evol.append(current_eps)
         else:
+            print("Attack failed")
+            print("Current class:", new_class)
+            print("Original class:", orig_class)
             attack_info = (None, None)
             
             if current_eps > epsilon:
                 print("Attack failed: epsilon exceeded",current_eps)
-            if step >= max_step:
+            if i >= max_step:
                 print("Attack failed: max step exceeded")
             print("Step:", i)
-            
-            return classifier.decision_function(data_point.reshape(1, -1))[0],0
+            break
+            #return classifier.decision_function(data_point.reshape(1, -1))[0],0
         i += step
     print("decision function",classifier.decision_function(data_point.reshape(1, -1))[0])
     fig, ax = plt.subplots(figsize=(10, 10))
     data_points_pos = np.array(data_points_pos)
-    ax.plot(data_points_pos[:,0],data_points_pos[:,1], marker="o", linestyle="", label="Data points")
+    ax.plot(data_points_pos[:,0],data_points_pos[:,1], marker="x", linestyle="", label="Data points")
     ax.plot(orig_point[0],orig_point[1], marker="o", linestyle="", label="Original point")
     # plot the line which separates the two classes
     w = classifier.coef_[0]
@@ -77,16 +79,16 @@ def fgsm_attack_svm_2c(classifier:svm.SVC, orig_point, dist_function, step=None,
 if __name__ == "__main__":
     
     
-    
-    X , y = make_blobs(n_samples=1000, centers=2, n_features=2, random_state=0)
+    import random
+    X , y = make_blobs(n_samples=1000, centers=2, n_features=2, random_state=10)
     # Split data
-    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=random.randint(0,1000))
     # Train model
     clf = svm.SVC(kernel='linear', C=1).fit(X_train, y_train)
     
     dist_func = lambda x, y: np.linalg.norm(x - y)
     
-    orig_point = X_test[0] 
+    orig_point = random.choice(X_test)
     
     attack_info = fgsm_attack_svm_2c(clf, orig_point, dist_function=dist_func,step=0.05)
     print("Attack info:", attack_info)
